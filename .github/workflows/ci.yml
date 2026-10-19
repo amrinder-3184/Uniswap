@@ -1,0 +1,80 @@
+# Continuous integration: lint the code and run the full API test suite
+# against a throwaway PostgreSQL database on every push and pull request.
+name: CI
+
+on:
+  push:          # any branch
+  pull_request:  # any target branch; runs without access to repository secrets
+
+# Read-only token: the workflow only needs to check out the code
+permissions:
+  contents: read
+
+# A newer push to the same branch/PR cancels the older, now-outdated run
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test:
+    name: Lint and test
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+
+    services:
+      # Fresh, empty database for this run only; destroyed when the job ends
+      postgres:
+        image: postgres:18
+        env:
+          POSTGRES_USER: uniswap_ci
+          POSTGRES_PASSWORD: ci_only_password_not_a_secret
+          POSTGRES_DB: uniswap_ci_test
+        ports:
+          - 5432:5432
+        # Steps start only after PostgreSQL reports it is ready
+        options: >-
+          --health-cmd "pg_isready -U uniswap_ci -d uniswap_ci_test"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+
+    # CI-only configuration. None of these values are real credentials:
+    # the database exists only inside this job, and the OpenAI settings point
+    # at a fake key and an unreachable local address, so no real API call can happen.
+    # The job runs on the runner itself, so the service is reached via localhost,
+    # which the test database guard already allows (no TEST_DB_ALLOWED_HOSTS needed).
+    env:
+      NODE_ENV: test
+      DB_HOST: localhost
+      DB_PORT: 5432
+      DB_NAME: uniswap_ci_test
+      DB_USER: uniswap_ci
+      DB_PASSWORD: ci_only_password_not_a_secret
+      JWT_SECRET: ci-only-throwaway-jwt-signing-key-0123456789abcdef
+      OPENAI_API_KEY: sk-test-not-a-real-key
+      OPENAI_BASE_URL: http://127.0.0.1:9/v1
+      ALLOWED_ORIGINS: http://localhost:5173
+
+    steps:
+      - name: Check out code
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Set up Node.js 24
+        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: 24
+          cache: npm
+
+      - name: Install dependencies (exact versions from package-lock.json)
+        run: npm ci
+
+      - name: Lint
+        run: npm run lint
+
+      # The test setup applies schema.sql to the empty database (CREATE ... IF NOT
+      # EXISTS only) and refuses to run unless the connected database ends in _test.
+      # Coverage thresholds in jest.config.js fail this step if coverage drops.
+      - name: Run tests with coverage
+        run: npm run test:coverage

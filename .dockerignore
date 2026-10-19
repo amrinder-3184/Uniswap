@@ -1,0 +1,9 @@
+# Allowlist: ignore everything, then include only what the image needs.
+# This keeps .env files, .git, node_modules, coverage, tests, legacy scripts
+# and local uploads out of the build context entirely.
+*
+!package.json
+!package-lock.json
+!index.js
+!db.js
+!src

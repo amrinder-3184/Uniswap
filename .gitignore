@@ -1,0 +1,15 @@
+node_modules/
+
+# Environment files hold real secrets; only the *.example templates are committed
+.env
+.env.*
+!.env.example
+!.env.test.example
+!.env.docker.example
+
+# User-uploaded images (runtime data, not source)
+uploads/
+
+# Generated artifacts
+coverage/
+*.log
