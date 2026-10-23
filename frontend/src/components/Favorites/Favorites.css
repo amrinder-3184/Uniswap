@@ -1,0 +1,52 @@
+.favorites-container {
+  padding: 24px;
+  background-color: white;
+  border-radius: 12px;
+  border: 1px solid #e5e7eb;
+  margin-top: 24px;
+}
+
+.favorites-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  gap: 20px;
+}
+
+.favorite-card {
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+}
+
+.favorite-title {
+  margin: 0 0 8px 0;
+  font-size: 1.1rem;
+}
+
+.favorite-price {
+  color: #2563eb;
+  font-weight: 700;
+  margin: 0 0 16px 0;
+}
+
+.favorite-btn {
+  background-color: #f3f4f6;
+  color: #374151;
+  text-decoration: none;
+  text-align: center;
+  padding: 8px;
+  border-radius: 6px;
+  margin-top: auto;
+}
+
+.favorite-btn:hover {
+  background-color: #e5e7eb;
+}
+
+.favorites-loading, .favorites-error, .favorites-empty {
+  padding: 24px;
+  text-align: center;
+  color: #6b7280;
+}

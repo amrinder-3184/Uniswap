@@ -1,0 +1,171 @@
+.browse-container {
+  padding: 8px 0 24px;
+}
+
+.browse-title {
+  font-size: 1.75rem;
+  color: #111827;
+  margin: 0 0 1rem 0;
+}
+
+.browse-filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 16px;
+}
+
+.browse-search-input {
+  flex: 1 1 260px;
+  padding: 10px 12px;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  font-size: 0.95rem;
+}
+
+.browse-search-btn {
+  padding: 10px 18px;
+  background-color: #2563eb;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.browse-search-btn:hover {
+  background-color: #1d4ed8;
+}
+
+.browse-select {
+  padding: 10px 12px;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  background: white;
+  font-size: 0.95rem;
+}
+
+.browse-active-search {
+  color: #4b5563;
+  margin: 0 0 12px 0;
+}
+
+.browse-clear-btn {
+  margin-left: 10px;
+  background: none;
+  border: none;
+  color: #2563eb;
+  cursor: pointer;
+  text-decoration: underline;
+}
+
+.browse-count {
+  color: #6b7280;
+  font-size: 0.9rem;
+  margin: 0 0 12px 0;
+}
+
+.browse-status {
+  color: #6b7280;
+  text-align: center;
+  padding: 32px 0;
+  font-style: italic;
+}
+
+.browse-error {
+  color: #dc2626;
+  background-color: #fef2f2;
+  padding: 12px;
+  border-radius: 6px;
+  border: 1px solid #fecaca;
+}
+
+.browse-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 20px;
+}
+
+.browse-card {
+  background: white;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.browse-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+}
+
+.browse-card-header {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 8px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #6b7280;
+  text-transform: uppercase;
+}
+
+.browse-card-title {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #1f2937;
+  margin: 0 0 8px 0;
+}
+
+.browse-card-price {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #2563eb;
+  margin: 0 0 12px 0;
+}
+
+.browse-card-description {
+  font-size: 0.9rem;
+  color: #4b5563;
+  line-height: 1.4;
+  flex-grow: 1;
+  margin: 0 0 16px 0;
+}
+
+.browse-card-btn {
+  display: block;
+  text-align: center;
+  background-color: #2563eb;
+  color: white;
+  padding: 8px 16px;
+  border-radius: 6px;
+  text-decoration: none;
+  font-weight: 500;
+}
+
+.browse-card-btn:hover {
+  background-color: #1d4ed8;
+}
+
+.browse-pagination {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 16px;
+  margin-top: 24px;
+  color: #4b5563;
+}
+
+.browse-pagination button {
+  padding: 8px 14px;
+  border: 1px solid #d1d5db;
+  background: white;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.browse-pagination button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}

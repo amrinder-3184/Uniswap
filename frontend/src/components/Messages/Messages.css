@@ -1,0 +1,162 @@
+.messages-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 20px;
+  height: calc(100vh - 100px);
+}
+
+.messages-layout {
+  display: flex;
+  height: 100%;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  overflow: hidden;
+  background: white;
+}
+
+.conversations-sidebar {
+  width: 300px;
+  border-right: 1px solid #e5e7eb;
+  background: #f9fafb;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+}
+
+.conversations-sidebar h3 {
+  padding: 15px;
+  margin: 0;
+  border-bottom: 1px solid #e5e7eb;
+  background: white;
+}
+
+.no-conversations {
+  padding: 15px;
+  color: #6b7280;
+  text-align: center;
+}
+
+.conversation-card {
+  padding: 15px;
+  border-bottom: 1px solid #e5e7eb;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.conversation-card:hover {
+  background: #f3f4f6;
+}
+
+.conversation-card.active {
+  background: #e5e7eb;
+}
+
+.conversation-card h4 {
+  margin: 0 0 5px 0;
+  font-size: 14px;
+}
+
+.latest-message {
+  margin: 0 0 5px 0;
+  color: #4b5563;
+  font-size: 13px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.conversation-card small {
+  color: #9ca3af;
+  font-size: 11px;
+}
+
+.thread-main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  background: white;
+}
+
+.thread-header {
+  padding: 15px;
+  border-bottom: 1px solid #e5e7eb;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.thread-header h3 {
+  margin: 0;
+}
+
+.thread-messages {
+  flex: 1;
+  padding: 20px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.message-bubble {
+  max-width: 70%;
+  padding: 10px 15px;
+  border-radius: 12px;
+  position: relative;
+}
+
+.message-bubble.sent {
+  align-self: flex-end;
+  background: #3b82f6;
+  color: white;
+  border-bottom-right-radius: 2px;
+}
+
+.message-bubble.received {
+  align-self: flex-start;
+  background: #f3f4f6;
+  color: #111827;
+  border-bottom-left-radius: 2px;
+}
+
+.message-time {
+  font-size: 10px;
+  opacity: 0.7;
+  margin-top: 5px;
+  text-align: right;
+}
+
+.message-input-area {
+  padding: 15px;
+  border-top: 1px solid #e5e7eb;
+  display: flex;
+  gap: 10px;
+}
+
+.message-input-area input {
+  flex: 1;
+  padding: 10px;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+}
+
+.message-input-area button {
+  padding: 10px 20px;
+  background: #3b82f6;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.message-input-area button:disabled {
+  background: #9ca3af;
+}
+
+.no-thread-selected {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #6b7280;
+}

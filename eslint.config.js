@@ -6,7 +6,9 @@ export default [
   {
     // The legacy root-level scripts (test-*.js, verify-*.js and other one-off
     // helpers) have not been reviewed yet and are not part of the app or CI.
-    ignores: ['node_modules/', 'coverage/', 'uploads/', '*.js', '*.cjs', '!index.js', '!db.js', '!jest.config.js', '!eslint.config.js'],
+    // frontend/ is linted by its own Oxlint setup (frontend/.oxlintrc.json), and
+    // its local build output (frontend/dist) must never be linted with these rules.
+    ignores: ['node_modules/', 'coverage/', 'uploads/', 'frontend/', '*.js', '*.cjs', '!index.js', '!db.js', '!jest.config.js', '!eslint.config.js'],
   },
   js.configs.recommended,
   {
