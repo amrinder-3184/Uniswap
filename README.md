@@ -1,12 +1,15 @@
-# UniSwap Backend
+# UniSwap
 
-REST API for **UniSwap**, a second-hand marketplace where students buy and sell items such as textbooks, notes, furniture and electronics within their campus.
+Full-stack app for **UniSwap**, a second-hand marketplace where students buy and sell items such as textbooks, notes, furniture and electronics within their campus.
 
-Built with Node.js, Express 5 and PostgreSQL. It includes JWT authentication, input validation, an automated API test suite (Jest + Supertest) running against an isolated test database, a GitHub Actions workflow, and a Docker Compose setup.
+- **Backend (repository root):** REST API built with Node.js, Express 5 and PostgreSQL. It includes JWT authentication, input validation, an automated API test suite (Jest + Supertest) running against an isolated test database, and a Docker Compose setup.
+- **Frontend (`frontend/`):** React 19 + Vite single-page app that uses the API.
+- **CI:** a GitHub Actions workflow checks both on every push and pull request.
 
 - [API reference](docs/API.md)
 - [Quick start (local)](#local-setup-nodejs--postgresql)
 - [Quick start (Docker)](#running-with-docker)
+- [Frontend](#frontend)
 - [Testing](#testing)
 
 ---
@@ -20,14 +23,15 @@ Built with Node.js, Express 5 and PostgreSQL. It includes JWT authentication, in
 6. [Local setup (Node.js + PostgreSQL)](#local-setup-nodejs--postgresql)
 7. [Environment variables](#environment-variables)
 8. [Running with Docker](#running-with-docker)
-9. [API overview](#api-overview)
-10. [Database schema](#database-schema)
-11. [Security, validation and error handling](#security-validation-and-error-handling)
-12. [Testing](#testing)
-13. [Continuous integration](#continuous-integration)
-14. [Verification status](#verification-status)
-15. [Troubleshooting](#troubleshooting)
-16. [Known limitations and future improvements](#known-limitations-and-future-improvements)
+9. [Frontend](#frontend)
+10. [API overview](#api-overview)
+11. [Database schema](#database-schema)
+12. [Security, validation and error handling](#security-validation-and-error-handling)
+13. [Testing](#testing)
+14. [Continuous integration](#continuous-integration)
+15. [Verification status](#verification-status)
+16. [Troubleshooting](#troubleshooting)
+17. [Known limitations and future improvements](#known-limitations-and-future-improvements)
 
 ---
 
@@ -35,7 +39,11 @@ Built with Node.js, Express 5 and PostgreSQL. It includes JWT authentication, in
 
 Students often sell used items through scattered chat groups, where listings get lost and nobody can tell whether an item is still available. UniSwap provides one place to list items, search and filter them, save favorites, message sellers and record purchases.
 
-This repository is the backend only. A separate React frontend consumes this API; it is not included here.
+This repository holds both parts, which are installed and run separately:
+- **The backend (API)** lives at the repository root. Most of this README is about it.
+- **The React frontend** lives in [`frontend/`](frontend/), with its own `package.json` and [README](frontend/README.md).
+
+The frontend calls the API over HTTP. The backend does not serve the frontend files.
 
 ## Features
 
@@ -98,7 +106,9 @@ Any error thrown along the way → src/middleware/error.middleware.js → consis
 | openai | Optional AI assistant | Chat with tool calling |
 | Jest + Supertest | Testing | Real HTTP requests against the app, no running server needed |
 | ESLint | Static checks | Catches unused code and common mistakes |
-| GitHub Actions | CI | Lint and tests on every push and pull request |
+| React 19 + Vite 8 | Frontend (`frontend/`) | Component-based UI; Vite gives a fast dev server and production builds |
+| Oxlint | Frontend static checks | Fast linter with React rules |
+| GitHub Actions | CI | Lint, tests and the frontend build on every push and pull request |
 | Docker + Compose | Containerised development | API and database with one command |
 
 ## Repository structure
@@ -127,15 +137,26 @@ Any error thrown along the way → src/middleware/error.middleware.js → consis
 ├── scripts/                 # Maintenance scripts (see below)
 ├── seed-categories.js       # Inserts default categories (skips existing ones)
 ├── Dockerfile, compose.yaml, .dockerignore
-├── .github/workflows/ci.yml
+├── .github/workflows/ci.yml # Backend job + frontend job
 ├── jest.config.js, eslint.config.js
-└── .env.example, .env.test.example, .env.docker.example   # Templates (placeholders only)
+├── .env.example, .env.test.example, .env.docker.example   # Templates (placeholders only)
+└── frontend/                # React + Vite app (own package.json, README, Oxlint, tests)
+    ├── src/                 # main.jsx, App.jsx, components/, utils/
+    ├── public/
+    ├── tests/               # Unit tests (Node's built-in test runner)
+    └── .env.example         # VITE_API_URL template
 ```
+
+The backend tooling deliberately leaves `frontend/` alone:
+- **ESLint** ignores it (the frontend has its own Oxlint).
+- **Jest** only looks in `tests/`.
+- **Coverage** only measures `src/` and `db.js`.
+- **The Docker image** is built from an allowlist that doesn't include `frontend/`.
 
 > ⚠️ **Legacy scripts. Do not run them.** The root folder also contains older standalone scripts from earlier development: `test-*.js`, `verify-*.js`, `run-all-tests.js`, `append-tool.js`, `fix-urls.cjs`, `check-pgvector.js`, `dump-schema.js` and `math.js`. They have **not been reviewed** and are not part of the test suite, linting or CI.
 > - Most `test-*.js` / `verify-*.js` scripts run `DELETE`/`TRUNCATE` statements against the database configured in `.env`, which is your development data.
 > - `append-tool.js` modifies source code.
-> - `fix-urls.cjs` rewrites files in the frontend repository.
+> - `fix-urls.cjs` rewrites files in a sibling `../uniswap-frontend` folder from before the frontend moved into `frontend/`. Running it again would corrupt the API URLs.
 >
 > Use `npm test` instead.
 
@@ -270,6 +291,32 @@ Listing images are stored in the named volume `uniswap_uploads`, mounted at `/ap
 - **Runtime user:** the unprivileged `node` user.
 - **Health check:** a Docker health check calls `/health`.
 - **Shutdown:** `node` runs directly (not through npm), so `docker stop` triggers the app's graceful shutdown.
+- **Frontend:** not included in the image or the Compose stack. Run it separately (see below).
+
+## Frontend
+
+The React app in [`frontend/`](frontend/) is a separate npm project. Details are in [frontend/README.md](frontend/README.md).
+
+**Pages:** home with recommendations, browse and search, listing detail, sell, my listings, favorites, messages, transactions, plus an AI chat widget.
+
+### Running it locally
+Start the backend first, either locally (`npm start`) or with Docker. Both serve the API on `http://localhost:3000`. Then, in a second terminal:
+```powershell
+cd frontend
+npm ci                          # first time only
+copy .env.example .env          # optional; VITE_API_URL defaults to http://localhost:3000
+npm run dev                     # http://localhost:5173
+```
+
+**CORS:** the backend's default `ALLOWED_ORIGINS` is `http://localhost:5173`, the Vite dev server, so no extra setup is needed. For another port, or `npm run preview` (port 4173), add that origin to `ALLOWED_ORIGINS` in the backend's settings file.
+
+### Frontend checks
+```powershell
+cd frontend
+npm run lint                    # Oxlint
+npm test                        # unit tests (Node's built-in test runner)
+npm run build                   # production build into frontend/dist (git-ignored)
+```
 
 ## API overview
 
@@ -410,32 +457,42 @@ Every test empties the tables it uses, so the suite has several safeguards again
 
 ## Continuous integration
 
-`.github/workflows/ci.yml` runs on every push and pull request:
+`.github/workflows/ci.yml` runs two independent jobs, in parallel, on every push and pull request.
 
+**Backend: lint and test** (repository root)
 1. **Starts a PostgreSQL 18 service** with an empty database `uniswap_ci_test`. A `pg_isready` health check makes the steps wait until it is ready.
 2. **Checks out the code** and **sets up Node.js 24** (both actions pinned to exact commit SHAs).
 3. **Installs dependencies** with `npm ci`.
 4. **Lints** with `npm run lint`.
 5. **Runs the tests** with `npm run test:coverage`. The test setup creates the tables from `schema.sql`, the safety guard checks the connection, and the job fails if a test fails or coverage drops below the thresholds in `jest.config.js`.
 
+**Frontend: lint, test and build** (in `frontend/`)
+1. **Checks out the code** and **sets up Node.js 24** (same pinned actions; npm cache keyed on `frontend/package-lock.json`).
+2. **Installs dependencies** with `npm ci`.
+3. **Lints** with `npm run lint` (Oxlint).
+4. **Runs the unit tests** with `npm test`.
+5. **Builds** with `npm run build`, to check the app compiles. It needs no backend, database or secrets.
+
 **Security:**
 - **Permissions:** the workflow token is read-only (`contents: read`), and the checkout step doesn't store it.
 - **Pull requests:** the workflow uses `pull_request`, not `pull_request_target`, so pull-request code never runs with repository secrets.
 - **No real secrets:** all CI settings are throwaway values in the workflow file, and the OpenAI settings point at a fake key and an unreachable address.
 
-The job has a 15-minute timeout, and a newer push cancels an outdated run.
+The backend job has a 15-minute timeout and the frontend job a 10-minute one. A newer push cancels an outdated run.
 
 ## Verification status
 
-The results below are from **local runs on 12 October 2026** (Windows, Node.js 24.16, PostgreSQL 18).
+All results below are from **local runs** (Windows, Node.js 24.16, PostgreSQL 18). Backend tests last ran on 23 October 2026, after the frontend was added.
 
 | Check | Result |
 |---|---|
-| `npm run lint` | Passes |
+| `npm run lint` | Passes, and ignores `frontend/` |
 | `npm test` | **230 tests passed, 0 failed, 0 skipped** (14 test files), in both normal and `--randomize` order |
 | `npm run test:coverage` | Statements 83.3%, branches 70.7%, functions 81.5%, lines 85.0%. Thresholds: 80 / 65 / 75 / 80. |
-| GitHub Actions | **Simulated locally only:** the workflow's commands and settings in a clean copy of the repo, against a new empty database. It has not yet run on GitHub. |
-| Docker | Image built (81 MB, non-root); Compose stack healthy; schema initialised on first start; API smoke test passed; data and uploads kept after `restart` and `down`/`up`; graceful shutdown confirmed. **All verified locally with Docker Desktop.** |
+| Frontend: `npm run lint`, `npm test`, `npm run build` (in `frontend/`) | Oxlint 0 errors and 0 warnings; **19 unit tests passed**; build succeeds |
+| Frontend in a real browser | **52/52 checks passed** in headless Chrome against the API running on the test database: browse, search, sorting, pagination, login, listing images, favorites, messages (including a deliberately delayed-response race), single chat widget, and 0 page errors. The browser script is not part of this repository. |
+| GitHub Actions | **Simulated locally only.** The backend job's commands and settings were run in a clean copy of the repo against a new empty database, and the frontend job's commands were run in `frontend/`. The workflow has not yet run on GitHub. |
+| Docker | Image built (81 MB, non-root); Compose stack healthy; schema initialised on first start; API smoke test passed; data and uploads kept after `restart` and `down`/`up`; graceful shutdown confirmed. **Verified locally with Docker Desktop on 12 October 2026, before the frontend was added.** The image excludes `frontend/` by its `.dockerignore` allowlist; that hasn't been re-checked with a new build. |
 
 Lowest-coverage areas:
 - `embedding.service.js`: semantic search is disabled.

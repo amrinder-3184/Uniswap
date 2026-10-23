@@ -1,5 +1,7 @@
-# Continuous integration: lint the code and run the full API test suite
-# against a throwaway PostgreSQL database on every push and pull request.
+# Continuous integration on every push and pull request:
+#  - backend: lint and run the full API test suite against a throwaway PostgreSQL database
+#  - frontend: lint, unit-test and build the React app in frontend/
+# The two jobs are independent and run in parallel.
 name: CI
 
 on:
@@ -17,7 +19,7 @@ concurrency:
 
 jobs:
   test:
-    name: Lint and test
+    name: "Backend: lint and test"
     runs-on: ubuntu-24.04
     timeout-minutes: 15
 
@@ -78,3 +80,40 @@ jobs:
       # Coverage thresholds in jest.config.js fail this step if coverage drops.
       - name: Run tests with coverage
         run: npm run test:coverage
+
+  frontend:
+    name: "Frontend: lint, test and build"
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+
+    # All "run" steps below execute inside frontend/, which has its own package.json
+    defaults:
+      run:
+        working-directory: frontend
+
+    steps:
+      - name: Check out code
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Set up Node.js 24
+        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Install dependencies (exact versions from frontend/package-lock.json)
+        run: npm ci
+
+      - name: Lint (Oxlint)
+        run: npm run lint
+
+      - name: Unit tests
+        run: npm test
+
+      # The build uses the default VITE_API_URL (http://localhost:3000); it only
+      # checks that the app compiles. No backend or secrets are needed.
+      - name: Build
+        run: npm run build
